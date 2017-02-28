@@ -1,0 +1,241 @@
+@mixin for-min-768 {
+	@media (min-width: 768px) { 
+		@content;
+	}
+}
+@mixin for-min-992 {
+	@media (min-width: 992px) { 
+		@content;
+	}
+}
+/* ========== Tags section ========== */
+html {
+	height: 100%;
+}
+body {
+	text-align: justify;
+	font-family: 'Lora', serif;
+	max-width: 1200px;
+	margin: auto;
+	color: #444;
+	padding-bottom: 30px;
+	border-left: 1px solid #eee;
+	border-right: 1px solid #eee;
+	box-shadow: 0 0 10px 5px #ddd;
+	min-height: 100%;
+}
+/* ========== Page title ========== */
+.header-side {
+	padding: 10px;
+}
+.header-left-big-block, 
+.header-right-big-block {
+	width: 150px;
+}
+.header-right-big-block {
+	float: right;
+}
+.header-link {
+	padding: 20px 15px;
+	border: 1px solid #999;
+	text-align-last: center;
+	transition: color 0.5s, background-color 0.5s;
+	text-decoration: none;
+	display: block;
+	color: #444;
+}
+.header-side > .header-link:hover {
+	color: #fff;
+	background-color: #444;
+	text-decoration: none;
+}
+.header-link:active, 
+.header-link:visited  {
+	color: #444;
+	background-color: #fff;
+	text-decoration: none;
+}
+.paper-title {
+	font-family: 'UnifrakturCook', cursive;
+	font-size: 60px;
+	color: #444;
+	cursor: default;
+}
+/* ========== Search delimiter ========== */
+.search-delimiter-top {
+	border-top: 2px solid #777;
+	height: 3px;
+	margin: auto;
+}
+.search-delimiter {
+	margin: auto;
+	border-top: 1px solid #777;
+	border-bottom: 2px solid #777;
+	height: 33px;
+	line-height: 30px;
+	color: #ccc;
+}
+.search-delimiter-bottom {
+	border-bottom: 1px solid #777;
+	height: 2px;
+	margin: auto;
+}
+.search-field {
+	height: 26px;
+	width: 100%;
+	border: none;
+	font-family: 'Lora', serif;
+	color: #777;
+	text-align: center;
+}
+/* ========== Article ========== */
+.article {
+	padding: 10px;
+	padding-top: 0;
+	position: relative;
+}
+.article-animate {
+	opacity: 0;
+}
+.standard-title {
+	margin-bottom: 10px;
+	border-bottom: 1px solid #777;
+	color: #222;
+	transition: background-color 0.5s;
+	cursor: pointer;
+	text-transform: uppercase;
+	font-family: 'Abril Fatface', cursive;
+    word-wrap: break-word;
+}
+/* ========== Grayed template ========== */
+.grayed-title > span {
+	width: 100%;
+	background-color: #777;
+	color: #777;
+	display: inline-block;
+	margin-top: 0;
+	font-size: 24px;
+}
+.article:nth-child(2n) .grayed-text-container {
+	float: left;
+}
+.grayed-text-container {
+	width: 65%;
+	min-height: 200px;
+	float: right;
+}
+.grayed-text > span {
+	color: #aaa;
+	background-color: #aaa;
+	font-size: 14px;
+	line-height: 14px;
+	display: inline-block;
+	width: 100%;
+}
+.grayed-text > span:last-child {
+	width: 60%;
+}
+.grayed-text:last-child > span:last-child {
+	width: 30%;
+}
+.grayed-text:first-child {
+	margin-top: 0;
+}
+.article:nth-child(2n) .grayed-image {
+	float: right;
+}
+.grayed-image {
+	width: 30%;
+	float: left;
+	min-height: 200px;
+	background-color: #999;
+	border: 3px solid #444;
+	color: #999;
+}
+/* ========== Helpers ==========*/
+.searchmatch {
+	background-color: yellow;
+}
+.grayscale {
+	-moz-filter: grayscale(100%);
+	-o-filter: grayscale(100%);
+	-webkit-filter: grayscale(100%);
+	filter: grayscale(100%);
+	-moz-transition: all 0.5s;
+	-o-transition: all 0.5s;
+	-webkit-transition: all 0.5s;
+	transition: all 0.5s;
+	/*  TODO: distinguish this */
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+.grayscale:hover {
+	-moz-filter: grayscale(0);
+	-o-filter: grayscale(0);
+	-webkit-filter: grayscale(0);
+	filter: grayscale(0);
+}
+.article > a, 
+.article > a:hover, 
+.article > a:active, 
+.article > a:visited {
+	text-decoration: none;
+}
+/* ========== First article ==========*/
+.image-article-1 {
+	background-repeat: no-repeat;
+	background-position: center 10%;
+}
+.image-container-1 {
+	margin-bottom: 10px;
+}
+.text-container-1 {
+	column-count: 1;
+	@include for-min-768 {
+		column-count: 2;
+	}
+	@include for-min-992 {
+		column-count: 3;
+	}
+}
+.title-1 {
+	font-size: 80px;
+	border-bottom: none;
+	font-family: 'Open Sans', sans-serif;
+}
+.text-container-2-2 {
+	float: right;
+}
+/* ========== Second article ==========*/
+.title-2 {
+	font-size: 60px;
+	border-bottom: none;
+}
+/* ========== Third and Fourth article ==========*/
+.image-article-3, 
+.image-article-4 {
+	background-repeat: no-repeat;
+	background-position: center 10%;
+}
+.text-container-3, 
+.text-container-4 {
+	column-count: 1;
+	@include for-min-768 {
+		column-count: 2;
+	}
+}
+.image-container-4 {
+	float: right;
+}
+/* ========== Three lines ==========*/
+.header-lines {
+	background-color: #444;
+	color: #fff;
+	margin-bottom: 10px;
+}
+.second-line {
+	@include for-min-768 {
+		border-left: 1px solid #777;
+		border-right: 1px solid #777;
+	}
+}
