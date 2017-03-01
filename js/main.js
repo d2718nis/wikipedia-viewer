@@ -187,6 +187,7 @@ function getArticleHtml(pageTitle, text, ind, thumbnail) {
 			imgClass = `image-article-${ind+1}`;
 		} else {
 			minHeight = ($('.first-line').width() - $('.first-line').css('padding-left').replace('px', '') * 2) / 1.6;
+			imgClass = `image-lines`;
 		}
 		img = `<div class="${imgClass} grayscale" style="min-height: ${minHeight}px; background-image: url(${thumbnail.source});"></div>`;
 	}
