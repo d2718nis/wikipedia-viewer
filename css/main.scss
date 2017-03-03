@@ -228,6 +228,14 @@ body {
 .image-container-4 {
 	float: right;
 }
+.image-container-2, 
+.image-container-3, 
+.image-container-4 {
+	margin-bottom: 10px;
+	@include for-min-768 {
+		margin-bottom: 0;
+	}
+}
 /* ========== Three lines ==========*/
 .header-lines {
 	background-color: #444;

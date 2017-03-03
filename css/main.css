@@ -219,6 +219,16 @@ body {
 .image-container-4 {
   float: right; }
 
+.image-container-2,
+.image-container-3,
+.image-container-4 {
+  margin-bottom: 10px; }
+  @media (min-width: 768px) {
+    .image-container-2,
+    .image-container-3,
+    .image-container-4 {
+      margin-bottom: 0; } }
+
 /* ========== Three lines ==========*/
 .header-lines {
   background-color: #444;
