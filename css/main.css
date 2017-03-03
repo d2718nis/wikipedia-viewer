@@ -40,7 +40,8 @@ body {
   text-decoration: none; }
 
 .header-link:active,
-.header-link:visited {
+.header-link:visited,
+.header-link:focus {
   color: #444;
   background-color: #fff;
   text-decoration: none; }
