@@ -112,9 +112,7 @@ function populatePagesPrepared(countThumbnails) {
 			break;
 		case 1:
 			// Article with image
-			firstPages[1] = seekAndDestroy(pageStats.width.indexOf(pageStats.rate.find(function(val) {
-				return val > 0;
-			})));
+			firstPages[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
 			// Article with longest extract
 			firstPages[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
 			break;
@@ -142,7 +140,7 @@ function populatePagesPrepared(countThumbnails) {
 			firstPages[3] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
 			break;
 	}
-	const limiter = countThumbnails + 1 > 2 ? 4 : countThumbnails + 1;
+	const limiter = countThumbnails + 1 > 3 ? 4 : countThumbnails + 1;
 	for (let i = 0; i < limiter; i++) {
 		pagesPrepared.push({"ind": i, "page": firstPages[i]});
 	}
