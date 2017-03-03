@@ -360,11 +360,14 @@ function placeHeaderSides() {
 function calculateImages() {
 	if ($(document).width() >= 768) {
 		if ($(document).width() > 768) {
+			// If .text-container-2-1 exists
+			if ($('.text-container-2-1').length) {
 			// Depends on which column is higher
-			if ($('.text-container-2-1').css('height').replace('px', '') > $('.text-container-2-2').css('height').replace('px', '')) {
-				$('.image-article-2').css('min-height', $('.text-container-2-1').css('height'));
-			} else {
-				$('.image-article-2').css('min-height', $('.text-container-2-2').css('height'));
+				if ($('.text-container-2-1').css('height').replace('px', '') > $('.text-container-2-2').css('height').replace('px', '')) {
+					$('.image-article-2').css('min-height', $('.text-container-2-1').css('height'));
+				} else {
+					$('.image-article-2').css('min-height', $('.text-container-2-2').css('height'));
+				}
 			}
 		} else {
 			$('.image-article-2').css('min-height', $('.text-container-2-3').css('height'));
