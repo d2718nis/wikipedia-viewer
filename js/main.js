@@ -75,11 +75,6 @@ function preparePages(json) {
 				/ (this.thumbnail.width / this.thumbnail.height)) : 0);
 		}
 	});
-	// How many articles?
-	console.log(pages.length);
-	console.log(JSON.stringify(pageStats));
-	console.log(countThumbnails + ' thumbs');
-
 	populatePagesPrepared(countThumbnails);
 }
 
@@ -209,8 +204,6 @@ function getArticleHtml(pageTitle, text, ind, thumbnail) {
 			</div>
 			`;
 		case 1:
-			console.log('second-text-length: ' + text.length);
-			console.log(text);
 			let delimiter = Math.round(text.length / 1.85);
 			while (text.charAt(delimiter) !== ' ') {
 				delimiter++;
