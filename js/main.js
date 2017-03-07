@@ -35,7 +35,7 @@ function requestAutocomplete(value) {
 	});
 
 	getAutocomplete.catch(function(err) {
-		alert('GetAutocomplete: ' + JSON.stringify(err));
+		console.log('GetAutocomplete: ' + JSON.stringify(err));
 	});
 }
 
@@ -77,7 +77,7 @@ function requestWikiInfo(value) {
 	});
 	// Something went wrong
 	getWiki.catch(function(err) {
-		alert('GetWiki: ' + JSON.stringify(err));
+		console.log('GetWiki: ' + JSON.stringify(err));
 	});
 }
 
