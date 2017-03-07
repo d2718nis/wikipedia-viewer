@@ -3,6 +3,42 @@ var pages;
 var pageStats;
 var pagesPrepared;
 
+// Request JSON from Wikipedia API for autocomplete
+function requestAutocomplete(value) {
+	const query = `https://en.wikipedia.org//w/api.php?
+		action=opensearch
+		&format=json
+		&origin=*
+		&search=${value}
+		&limit=10`;
+	const getAutocomplete = $.getJSON(query);
+
+	getAutocomplete.then(function(json) {
+		let searchRequested = false;
+		// Check if input value equals on of the option values
+		$.each($('#search-autocomplete>option'), function(i, item) {
+			if (this.value == $('.search-field').val()) {
+				searchRequested = true;
+			}
+		});
+		if (searchRequested) {
+			requestWikiInfo($('.search-field').val());
+			$('#search-autocomplete').html('');
+		} else {
+			$('#search-autocomplete').html('');
+			if (json[1].length > 1) {
+				$.each(json[1].slice(1), function(i, item) {
+					$('#search-autocomplete').append('<option value="' + item + '">');
+				});
+			}
+		}
+	});
+
+	getAutocomplete.catch(function(err) {
+		alert('GetAutocomplete: ' + JSON.stringify(err));
+	});
+}
+
 // Request JSON from Wikipedia API
 function requestWikiInfo(value) {
 	const query = `https://en.wikipedia.org/w/api.php?
@@ -394,13 +430,28 @@ $(document).ready(function() {
 		calculateImages();
 	});
 
-	// Search event
+	// Search onEnter event
 	$('.search-field').keyup(function(event) {
-		// 13 for Enter key
-	    if (event.keyCode == 13 && $('.search-field').val().length > 2) {
-			requestWikiInfo($('.search-field').val());
+		if ($('.search-field').val().length) {
+			// 13 for Enter key
+			if (event.keyCode == 13) {
+				requestWikiInfo($('.search-field').val());
+				$('#search-autocomplete').html('');
+			}
+		} else {
+			$('#search-autocomplete').html('');
+			// This is needed to hide <datalist> in Chrome
+			$('.search-field').blur();
+			$('.search-field').focus();
 		}
 	});
+
+	// HTML5 event handler
+	$('.search-field')[0].oninput = function(event) {
+		if ($('.search-field').val().length && event.keyCode !== 13) {
+			requestAutocomplete($('.search-field').val());
+		}
+	};
 
 	// Easter egg
 	$('.paper-title').on('click', function() {
