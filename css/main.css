@@ -84,6 +84,10 @@ body {
 .search-field::-webkit-calendar-picker-indicator {
   display: none; }
 
+.no-matches {
+  display: none;
+  padding-top: 10px; }
+
 /* ========== Article ========== */
 .article {
   padding: 10px;

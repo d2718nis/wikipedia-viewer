@@ -59,10 +59,10 @@ function requestWikiInfo(value) {
 	const getWiki = $.getJSON(query);
 	// Received JSON
 	getWiki.then(function(json) {
+		// Remove previous articles
+		$('.article').remove();
+		$('.three-lines').remove();
 		if (json.hasOwnProperty('query')) {
-			// Remove previous articles
-			$('.article').remove();
-			$('.three-lines').remove();
 			// Prepare the array
 			preparePages(json);
 
@@ -72,7 +72,7 @@ function requestWikiInfo(value) {
 			}
 			calculateImages();
 		} else {
-			alert('Sorry, no matches!');
+			displayNoMatches();
 		}
 	});
 	// Something went wrong
@@ -417,6 +417,15 @@ function makeText(page, searchWord) {
 	return page.extract.replace(RegExp(`(${searchWord})`, `ig`), `<span class="searchmatch">$1</span>`);
 }
 
+function displayNoMatches() {
+	$('.no-matches').text('No results were found under your search, try something else.');
+	$('.no-matches').css('display', 'block');
+}
+
+function hideNoMatches() {
+	$('.no-matches').css('display', 'none');
+	$('.no-matches').text('');
+}
 
 
 $(document).ready(function() {
@@ -432,6 +441,7 @@ $(document).ready(function() {
 
 	// Search onEnter event
 	$('.search-field').keyup(function(event) {
+		hideNoMatches();
 		if ($('.search-field').val().length) {
 			// 13 for Enter key
 			if (event.keyCode == 13) {
@@ -448,6 +458,7 @@ $(document).ready(function() {
 
 	// HTML5 event handler
 	$('.search-field')[0].oninput = function(event) {
+		hideNoMatches();
 		if ($('.search-field').val().length && event.keyCode !== 13) {
 			requestAutocomplete($('.search-field').val());
 		}
