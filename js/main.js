@@ -363,16 +363,8 @@ function randomTitleStyle() {
 
 // Get the shortest
 function getShortestLine() {
-	if ($('.first-line').height() <= $('.second-line').height() 
-		&& $('.first-line').height() <= $('.third-line').height()) {
-		return $('.first-line');
-	} else if ($('.second-line').height() <= $('.first-line').height() 
-		&& $('.second-line').height() <= $('.third-line').height()) {
-		return $('.second-line');
-	} else if ($('.third-line').height() <= $('.first-line').height() 
-		&& $('.third-line').height() <= $('.second-line').height()) {
-		return $('.third-line');
-	}
+	return [$('.first-line'), $('.second-line'), $('.third-line')].reduce((acc, val) =>
+		acc = val.height() < acc.height() ? val : acc);
 }
 
 // Calculate title squres height and paddings
