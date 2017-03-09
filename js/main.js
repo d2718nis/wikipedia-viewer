@@ -11,13 +11,14 @@ function requestAutocomplete(value) {
 		&origin=*
 		&search=${value}
 		&limit=10`;
+
 	const getAutocomplete = $.getJSON(query);
 
 	getAutocomplete.then(function(json) {
 		let searchRequested = false;
-		// Check if input value equals on of the option values
-		$.each($('#search-autocomplete>option'), function(i, item) {
-			if (this.value == $('.search-field').val()) {
+		// Check if search field value equals on of the suggestions
+		$.each($('#search-autocomplete > option'), (i, item) => {
+			if (item.value == $('.search-field').val()) {
 				searchRequested = true;
 			}
 		});
@@ -26,9 +27,10 @@ function requestAutocomplete(value) {
 			$('#search-autocomplete').html('');
 		} else {
 			$('#search-autocomplete').html('');
+			// First element equals searched value, exclude it
 			if (json[1].length > 1) {
-				$.each(json[1].slice(1), function(i, item) {
-					$('#search-autocomplete').append('<option value="' + item + '">');
+				$.each(json[1].slice(1), (i, item) => {
+					$('#search-autocomplete').append(`<option value="${item}">`)
 				});
 			}
 		}
