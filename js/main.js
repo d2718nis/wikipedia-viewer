@@ -5,16 +5,14 @@ var pagesPrepared;
 
 // Request JSON from Wikipedia API for autocomplete
 function requestAutocomplete(value) {
-	const query = `https://en.wikipedia.org//w/api.php?
+	const getAutocomplete = $.getJSON(`https://en.wikipedia.org//w/api.php?
 		action=opensearch
 		&format=json
 		&origin=*
 		&search=${value}
-		&limit=10`;
+		&limit=10`);
 
-	const getAutocomplete = $.getJSON(query);
-
-	getAutocomplete.then(function(json) {
+	getAutocomplete.then(json => {
 		let searchRequested = false;
 		// Check if search field value equals on of the suggestions
 		$.each($('#search-autocomplete > option'), (i, item) => {
@@ -36,14 +34,14 @@ function requestAutocomplete(value) {
 		}
 	});
 
-	getAutocomplete.catch(function(err) {
+	getAutocomplete.catch(err => {
 		console.log('GetAutocomplete: ' + JSON.stringify(err));
 	});
 }
 
 // Request JSON from Wikipedia API
 function requestWikiInfo(value) {
-	const query = `https://en.wikipedia.org/w/api.php?
+	const getWiki = $.getJSON(`https://en.wikipedia.org/w/api.php?
 		origin=*
 		&format=json
 		&action=query
@@ -56,29 +54,25 @@ function requestWikiInfo(value) {
 		&pithumbsize=1200
 		&exintro
 		&exlimit=20
-		&ppprop=disambiguation`;
+		&ppprop=disambiguation`);
 
-	const getWiki = $.getJSON(query);
-	// Received JSON
-	getWiki.then(function(json) {
+	getWiki.then(json => {
 		// Remove previous articles
 		$('.article').remove();
 		$('.three-lines').remove();
 		if (json.hasOwnProperty('query')) {
 			// Prepare the array
 			preparePages(json);
-
-			for (let i = 0; i < pagesPrepared.length; i++) {
-				placeArticle(pagesPrepared[i].page, value, pagesPrepared[i].ind);
-				//pagesPrepared.splice(i, 1);
-			}
+			$.each(pagesPrepared, (i, item) => {
+				placeArticle(item.page, value, item.ind);
+			});
 			calculateImages();
 		} else {
 			displayNoMatches();
 		}
 	});
-	// Something went wrong
-	getWiki.catch(function(err) {
+
+	getWiki.catch(err => {
 		console.log('GetWiki: ' + JSON.stringify(err));
 	});
 }
