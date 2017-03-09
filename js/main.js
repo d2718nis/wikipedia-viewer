@@ -202,108 +202,106 @@ function placeArticle(page, searchWord, ind) {
 	}
 }
 
-// Return article 
-function getArticleHtml(pageTitle, text, ind, thumbnail) {
-	let minHeight;
-	let imgClass = '';
-	let img = '';
-	if (thumbnail !== undefined) {
-		if (ind == 0) {
-			minHeight = thumbnail.height < $(document).height() / 2 ? thumbnail.height : $(document).height() / 2;
-			imgClass = `image-article-${ind+1}`;
-		} else if (ind < 4) {
-			minHeight = thumbnail.height;
-			imgClass = `image-article-${ind+1}`;
-		} else {
-			minHeight = ($('.first-line').width() - $('.first-line').css('padding-left').replace('px', '') * 2) / 1.6;
-			imgClass = `image-lines`;
-		}
-		img = `<div class="${imgClass} grayscale" style="min-height: ${minHeight}px; background-image: url(${thumbnail.source});"></div>`;
-	}
-	switch (ind) {
+// Return article html string
+function getArticleHtml(articleTitle, articleText, articleIndex, articleThumbnail) {
+	const img = getArticleImg(articleThumbnail, articleIndex);
+	switch (articleIndex) {
 		case 0:
 			return `
 			<div class="article article-animate row">
-				<a class="col-xs-12" href="https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}" target="_blank">
-					<h2 class="text-center standard-title title-${ind+1}">
-						${pageTitle}
+				<a class="col-xs-12" href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
+					<h2 class="text-center standard-title title-${articleIndex+1}">
+						${articleTitle}
 					</h2>
 				</a>
-				<div class="col-xs-12 image-container-${ind+1}">
-					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}" target="_blank">
+				<div class="col-xs-12 image-container-${articleIndex+1}">
+					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 						${img}
 					</a>
 				</div>
-				<div class="col-xs-12 text-container-${ind+1}">
-					${text}
+				<div class="col-xs-12 text-container-${articleIndex+1}">
+					${articleText}
 				</div>
-			</div>
-			`;
+			</div>`;
 		case 1:
-			let delimiter = Math.round(text.length / 1.85);
-			while (text.charAt(delimiter) !== ' ') {
+			let delimiter = Math.round(articleText.length / 1.85);
+			while (articleText.charAt(delimiter) !== ' ') {
 				delimiter++;
 			}
-			const text1 = text.substr(0, delimiter);
-			const text2 = text.substr(delimiter + 1);
 			return `
 			<div class="article article-animate row">
-				<a class="col-xs-12" href="https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}" target="_blank">
-					<h2 class="text-center standard-title title-${ind+1}">
-						${pageTitle}
+				<a class="col-xs-12" href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
+					<h2 class="text-center standard-title title-${articleIndex+1}">
+						${articleTitle}
 					</h2>
 				</a>
-				<div class="col-md-3 hidden-xs hidden-sm text-container-${ind+1}-1">
-					${text1}
+				<div class="col-md-3 hidden-xs hidden-sm text-container-${articleIndex+1}-1">
+					${articleText.substr(0, delimiter)}
 				</div>
-				<div class="col-xs-12 col-sm-8 col-md-6 image-container-${ind+1}">
-					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}" target="_blank">
+				<div class="col-xs-12 col-sm-8 col-md-6 image-container-${articleIndex+1}">
+					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 						${img}
 					</a>
 				</div>
-				<div class="col-md-3 hidden-xs hidden-sm text-container-${ind+1}-2">
-					${text2}
+				<div class="col-md-3 hidden-xs hidden-sm text-container-${articleIndex+1}-2">
+					${articleText.substr(delimiter + 1)}
 				</div>
-				<div class="col-xs-12 col-sm-4 visible-xs-block visible-sm-block text-container-${ind+1}-3">
-					${text}
+				<div class="col-xs-12 col-sm-4 visible-xs-block visible-sm-block text-container-${articleIndex+1}-3">
+					${articleText}
 				</div>
-			</div>
-			`;
+			</div>`;
 		case 2:
 		case 3:
 			return `
 			<div class="article article-animate row">
-				<a class="col-xs-12" href="https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}" target="_blank">
+				<a class="col-xs-12" href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 					<h2 class="text-center standard-title">
-						${pageTitle}
+						${articleTitle}
 					</h2>
 				</a>
-				<div class="col-xs-12 col-sm-4 image-container-${ind+1}">
-					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}" target="_blank">
+				<div class="col-xs-12 col-sm-4 image-container-${articleIndex+1}">
+					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 						${img}
 					</a>
 				</div>
-				<div class="col-xs-12 col-sm-8 text-container-${ind+1}">
-					${text}
+				<div class="col-xs-12 col-sm-8 text-container-${articleIndex+1}">
+					${articleText}
 				</div>
-			</div>
-			`;
+			</div>`;
 		default:
 			return `
 			<div class="article">
-				<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}" target="_blank">
+				<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 					<h2 style="${randomTitleStyle()}" class="text-center standard-title">
-						${pageTitle}
+						${articleTitle}
 					</h2>
 				</a>
-				<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}" target="_blank">
+				<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 					${img}
 				</a>
-				${text}
-			</div>
-			`;
+				${articleText}
+			</div>`;
 	}
 	
+}
+
+// Calculate article image properties and return
+function getArticleImg(articleThumbnail, articleIndex) {
+	let img = '', minHeight, imgClass;
+	if (articleThumbnail !== undefined) {
+		if (articleIndex == 0) {
+			minHeight = articleThumbnail.height < $(document).height() / 2 ? articleThumbnail.height : $(document).height() / 2;
+			imgClass = `image-article-${articleIndex+1}`;
+		} else if (articleIndex < 4) {
+			minHeight = articleThumbnail.height;
+			imgClass = `image-article-${articleIndex+1}`;
+		} else {
+			minHeight = ($('.first-line').width() - $('.first-line').css('padding-left').replace('px', '') * 2) / 1.6;
+			imgClass = `image-lines`;
+		}
+		img = `<div class="${imgClass} grayscale" style="min-height: ${minHeight}px; background-image: url(${articleThumbnail.source});"></div>`;
+	}
+	return img;
 }
 
 // Create lines
