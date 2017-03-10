@@ -68,7 +68,7 @@ function requestWikiInfo(value) {
 			});
 			calculateImages();
 		} else {
-			displayNoMatches();
+			$('.no-matches').css('display', 'block');
 		}
 	});
 
@@ -81,15 +81,8 @@ function requestWikiInfo(value) {
 function preparePages(articles) {
 	// TODO: delete this thing, TMP only
 	pages = [];
-	pageStats = {"index": [], 
-				"length": [], 
-				"width": [], 
-				"height": [], 
-				"rate": [], 
-				"k1": [], 
-				"k234": []};
+	pageStats = { index: [], length: [], rate: [], k1: [], k234: [] };
 	pagesPrepared = [];
-	let countThumbnails = 0;
 	$.each(articles, (i, item) => {
 		// Populate the array
 		if (!item.hasOwnProperty('pageprops') && item.hasOwnProperty('extract')) {
@@ -97,17 +90,14 @@ function preparePages(articles) {
 			// Page stats and counters
 			pageStats.index.push(item.index);
 			pageStats.length.push(item.extract.length);
-			pageStats.width.push(item.hasOwnProperty('thumbnail') ? item.thumbnail.width : 0);
-			pageStats.height.push(item.hasOwnProperty('thumbnail') ? item.thumbnail.height : 0);
 			pageStats.rate.push(item.hasOwnProperty('thumbnail') ? item.thumbnail.width / item.thumbnail.height : 0);
 			pageStats.k1.push(item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.width 
 				* (item.thumbnail.width / item.thumbnail.height)) : 0);
 			pageStats.k234.push(item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.height 
 				/ (item.thumbnail.width / item.thumbnail.height)) : 0);
-			countThumbnails += item.hasOwnProperty('thumbnail') ? 1 : 0;
 		}
 	});
-	populatePagesPrepared(countThumbnails);
+	populatePagesPrepared(pageStats.rate.reduce((acc, val) => acc += val ? 1 : 0));
 }
 
 // Move item from pages array
@@ -182,41 +172,36 @@ function populatePagesPrepared(countThumbnails) {
 }
 
 // Generate and add to the page
-function placeArticle(article, searchWord, articleIndex) {
-	if (articleIndex < 4) {
-		$('.container').append(
-			getArticleHtml(article.title, article.extract, searchWord, articleIndex, article.thumbnail)
-		);
-		$('.article-animate').eq(articleIndex).animate({opacity: 1}, 800 + articleIndex * 80);
+function placeArticle(article, searchWord, articlePosition) {
+	if (articlePosition < 4) {
+		$('.container').append(getArticleHtml(article.title, article.extract, searchWord, articlePosition, article.thumbnail));
+		$('.article-animate').eq(articlePosition).animate({opacity: 1}, 800 + articlePosition * 80);
 	} else {
-		if (articleIndex == 4) {
+		if (articlePosition == 4) {
 			createLines(searchWord);
 		}
-		getShortestLine().html(
-			getShortestLine().html()
-			+ getArticleHtml(article.title, article.extract, searchWord, articleIndex, article.thumbnail)
-		);
+		getShortestLine().append(getArticleHtml(article.title, article.extract, searchWord, articlePosition, article.thumbnail));
 	}
 }
 
 // Return article html string
-function getArticleHtml(articleTitle, articleText, searchWord, articleIndex, articleThumbnail) {
-	const img = getArticleImg(articleThumbnail, articleIndex);
-	switch (articleIndex) {
+function getArticleHtml(articleTitle, articleText, searchWord, articlePosition, articleThumbnail) {
+	const img = getArticleImg(articleThumbnail, articlePosition);
+	switch (articlePosition) {
 		case 0:
 			return `
 			<div class="article article-animate row">
 				<a class="col-xs-12" href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
-					<h2 class="text-center standard-title title-${articleIndex+1}">
+					<h2 class="text-center standard-title title-${articlePosition+1}">
 						${articleTitle}
 					</h2>
 				</a>
-				<div class="col-xs-12 image-container-${articleIndex+1}">
+				<div class="col-xs-12 image-container-${articlePosition+1}">
 					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 						${img}
 					</a>
 				</div>
-				<div class="col-xs-12 text-container-${articleIndex+1}">
+				<div class="col-xs-12 text-container-${articlePosition+1}">
 					${highlightSearchWord(articleText, searchWord)}
 				</div>
 			</div>`;
@@ -228,22 +213,22 @@ function getArticleHtml(articleTitle, articleText, searchWord, articleIndex, art
 			return `
 			<div class="article article-animate row">
 				<a class="col-xs-12" href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
-					<h2 class="text-center standard-title title-${articleIndex+1}">
+					<h2 class="text-center standard-title title-${articlePosition+1}">
 						${articleTitle}
 					</h2>
 				</a>
-				<div class="col-md-3 hidden-xs hidden-sm text-container-${articleIndex+1}-1">
+				<div class="col-md-3 hidden-xs hidden-sm text-container-${articlePosition+1}-1">
 					${highlightSearchWord(articleText.substr(0, delimiter), searchWord)}
 				</div>
-				<div class="col-xs-12 col-sm-8 col-md-6 image-container-${articleIndex+1}">
+				<div class="col-xs-12 col-sm-8 col-md-6 image-container-${articlePosition+1}">
 					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 						${img}
 					</a>
 				</div>
-				<div class="col-md-3 hidden-xs hidden-sm text-container-${articleIndex+1}-2">
+				<div class="col-md-3 hidden-xs hidden-sm text-container-${articlePosition+1}-2">
 					${highlightSearchWord(articleText.substr(delimiter + 1), searchWord)}
 				</div>
-				<div class="col-xs-12 col-sm-4 visible-xs-block visible-sm-block text-container-${articleIndex+1}-3">
+				<div class="col-xs-12 col-sm-4 visible-xs-block visible-sm-block text-container-${articlePosition+1}-3">
 					${highlightSearchWord(articleText, searchWord)}
 				</div>
 			</div>`;
@@ -256,12 +241,12 @@ function getArticleHtml(articleTitle, articleText, searchWord, articleIndex, art
 						${articleTitle}
 					</h2>
 				</a>
-				<div class="col-xs-12 col-sm-4 image-container-${articleIndex+1}">
+				<div class="col-xs-12 col-sm-4 image-container-${articlePosition+1}">
 					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 						${img}
 					</a>
 				</div>
-				<div class="col-xs-12 col-sm-8 text-container-${articleIndex+1}">
+				<div class="col-xs-12 col-sm-8 text-container-${articlePosition+1}">
 					${highlightSearchWord(articleText, searchWord)}
 				</div>
 			</div>`;
@@ -283,15 +268,15 @@ function getArticleHtml(articleTitle, articleText, searchWord, articleIndex, art
 }
 
 // Calculate article image properties and return
-function getArticleImg(articleThumbnail, articleIndex) {
+function getArticleImg(articleThumbnail, articlePosition) {
 	let img = '', minHeight, imgClass;
 	if (articleThumbnail !== undefined) {
-		if (articleIndex == 0) {
+		if (articlePosition == 0) {
 			minHeight = articleThumbnail.height < $(document).height() / 2 ? articleThumbnail.height : $(document).height() / 2;
-			imgClass = `image-article-${articleIndex+1}`;
-		} else if (articleIndex < 4) {
+			imgClass = `image-article-${articlePosition+1}`;
+		} else if (articlePosition < 4) {
 			minHeight = articleThumbnail.height;
-			imgClass = `image-article-${articleIndex+1}`;
+			imgClass = `image-article-${articlePosition+1}`;
 		} else {
 			minHeight = ($('.first-line').width() - $('.first-line').css('padding-left').replace('px', '') * 2) / 1.6;
 			imgClass = `image-lines`;
@@ -311,8 +296,7 @@ function createLines(searchWord) {
 				<div class="col-xs-12 col-sm-4 first-line"></div>
 				<div class="col-xs-12 col-sm-4 second-line"></div>
 				<div class="col-xs-12 col-sm-4 third-line"></div>
-			</div>
-			`);
+			</div>`);
 }
 
 // Random title style
@@ -321,9 +305,8 @@ function randomTitleStyle() {
 	const color = ['background-color: #333;color: #fff;', 'background-color: #fff;color: #333;'];
 	const font = [`font-family: 'Lora', serif;`, `font-family: 'Abril Fatface', cursive;`,
 	 `font-family: 'Open Sans', sans-serif;`];
-	let style = italic[Math.floor(Math.random() * italic.length)];
-	style += color[Math.floor(Math.random() * color.length)];
-	return style += font[Math.floor(Math.random() * font.length)];
+	return italic[Math.floor(Math.random() * italic.length)] + color[Math.floor(Math.random() * color.length)]
+	+ font[Math.floor(Math.random() * font.length)];
 }
 
 // Get the shortest
@@ -336,7 +319,7 @@ function getShortestLine() {
 function placeHeaderSides() {
 	if ($(document).width() >= 768) {
 		$('.header-side.hidden-xs').css('padding-top', '10px');
-		height = $('.header-center').height() - $('.header-side.hidden-xs').height() - 10;
+		const height = $('.header-center').height() - $('.header-side.hidden-xs').height() - 10;
 		if (height > 10)
 			$('.header-side.hidden-xs').css('padding-top', height);
 	}
@@ -348,7 +331,7 @@ function calculateImages() {
 		if ($(document).width() > 768) {
 			// If .text-container-2-1 exists
 			if ($('.text-container-2-1').length) {
-			// Depends on which column is higher
+				// Depends on which column is higher
 				if ($('.text-container-2-1').css('height').replace('px', '') > $('.text-container-2-2').css('height').replace('px', '')) {
 					$('.image-article-2').css('min-height', $('.text-container-2-1').css('height'));
 				} else {
@@ -374,14 +357,6 @@ function highlightSearchWord(text, searchWord) {
 	return text.replace(RegExp(`(${searchWord})`, `ig`), `<span class="searchmatch">$1</span>`);
 }
 
-function displayNoMatches() {
-	$('.no-matches').css('display', 'block');
-}
-
-function hideNoMatches() {
-	$('.no-matches').css('display', 'none');
-}
-
 
 $(document).ready(() => {
 
@@ -396,7 +371,7 @@ $(document).ready(() => {
 
 	// Search onEnter event
 	$('.search-field').keyup(event => {
-		hideNoMatches();
+		$('.no-matches').css('display', 'none');
 		if ($('.search-field').val().length) {
 			// 13 for Enter key
 			if (event.keyCode == 13) {
@@ -413,7 +388,7 @@ $(document).ready(() => {
 
 	// HTML5 event handler
 	$('.search-field')[0].oninput = event => {
-		hideNoMatches();
+		$('.no-matches').css('display', 'none');
 		if ($('.search-field').val().length && event.keyCode !== 13) {
 			requestAutocomplete($('.search-field').val());
 		}
