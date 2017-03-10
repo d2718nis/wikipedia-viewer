@@ -62,9 +62,9 @@ function requestWikiInfo(value) {
 		$('.three-lines').remove();
 		if (json.hasOwnProperty('query')) {
 			// Prepare the array
-			preparePages(json);
+			preparePages(json.query.pages);
 			$.each(pagesPrepared, (i, item) => {
-				placeArticle(item.page, value, item.ind);
+				placeArticle(item.page, value, item.position);
 			});
 			calculateImages();
 		} else {
@@ -78,7 +78,7 @@ function requestWikiInfo(value) {
 }
 
 // Prepare pages
-function preparePages(json) {
+function preparePages(articles) {
 	// TODO: delete this thing, TMP only
 	pages = [];
 	pageStats = {"index": [], 
@@ -90,21 +90,21 @@ function preparePages(json) {
 				"k234": []};
 	pagesPrepared = [];
 	let countThumbnails = 0;
-	$.each(json.query.pages, function(i, item) {
+	$.each(articles, (i, item) => {
 		// Populate the array
-		if (!this.hasOwnProperty('pageprops') && this.hasOwnProperty('extract')) {
-			pages.push(this);
+		if (!item.hasOwnProperty('pageprops') && item.hasOwnProperty('extract')) {
+			pages.push(item);
 			// Page stats and counters
-			countThumbnails += this.hasOwnProperty('thumbnail') ? 1 : 0;
-			pageStats.index.push(this.index);
-			pageStats.length.push(this.extract.length);
-			pageStats.width.push(this.hasOwnProperty('thumbnail') ? this.thumbnail.width : 0);
-			pageStats.height.push(this.hasOwnProperty('thumbnail') ? this.thumbnail.height : 0);
-			pageStats.rate.push(this.hasOwnProperty('thumbnail') ? this.thumbnail.width / this.thumbnail.height : 0);
-			pageStats.k1.push(this.hasOwnProperty('thumbnail') ? Math.round(this.extract.length * this.thumbnail.width 
-				* (this.thumbnail.width / this.thumbnail.height)) : 0);
-			pageStats.k234.push(this.hasOwnProperty('thumbnail') ? Math.round(this.extract.length * this.thumbnail.height 
-				/ (this.thumbnail.width / this.thumbnail.height)) : 0);
+			pageStats.index.push(item.index);
+			pageStats.length.push(item.extract.length);
+			pageStats.width.push(item.hasOwnProperty('thumbnail') ? item.thumbnail.width : 0);
+			pageStats.height.push(item.hasOwnProperty('thumbnail') ? item.thumbnail.height : 0);
+			pageStats.rate.push(item.hasOwnProperty('thumbnail') ? item.thumbnail.width / item.thumbnail.height : 0);
+			pageStats.k1.push(item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.width 
+				* (item.thumbnail.width / item.thumbnail.height)) : 0);
+			pageStats.k234.push(item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.height 
+				/ (item.thumbnail.width / item.thumbnail.height)) : 0);
+			countThumbnails += item.hasOwnProperty('thumbnail') ? 1 : 0;
 		}
 	});
 	populatePagesPrepared(countThumbnails);
@@ -112,89 +112,90 @@ function preparePages(json) {
 
 // Move item from pages array
 function seekAndDestroy(sInd) {
-	let pageToReturn;
-	$.each(pages, function(i, item) {
-		if (this.index == pageStats.index[sInd]) {
-			pageToReturn = this;
-			pages.splice(pages.indexOf(pageToReturn), 1);
-			$.each(pageStats, function(i, item) {
+	let articleToReturn;
+	$.each(pages, (i, article) => {
+		if (article.index == pageStats.index[sInd]) {
+			articleToReturn = article;
+			pages.splice(pages.indexOf(articleToReturn), 1);
+			$.each(pageStats, (i, pageStat) => {
 				// Remove index[sInd], length[sInd] ...
-				this.splice(sInd, 1);
+				pageStat.splice(sInd, 1);
 			});
 			// break
 			return false;
 		}
 	});
-	return pageToReturn;
+	return articleToReturn;
 }
 
 // Fill pagesPrepared depending on thumbnail quantity
 function populatePagesPrepared(countThumbnails) {
 	// Build page prototype
-	let firstPages = [];
+	let firstPage = [];
 	switch(countThumbnails) {
 		case 0:
 			// Article with longest extract
-			firstPages[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
+			firstPage[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
 			break;
 		case 1:
 			// Article with image
-			firstPages[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
 			// Article with longest extract
-			firstPages[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
+			firstPage[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
 			break;
 		case 2:
 			// Article with maximum k234 factor
-			firstPages[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPages[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
 			// Article with longest extract
-			firstPages[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
+			firstPage[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
 			break;
 		case 3:
 			// Article with maximum k234 factor
-			firstPages[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPages[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPages[3] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[3] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
 			// Article with longest extract
-			firstPages[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
+			firstPage[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
 			break;
 		default:
 			// Article with maximum k234 factor
-			firstPages[0] = seekAndDestroy(pageStats.k1.indexOf(Math.max(...pageStats.k1)));
+			firstPage[0] = seekAndDestroy(pageStats.k1.indexOf(Math.max(...pageStats.k1)));
 			// Article with maximum k234 factor
-			firstPages[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPages[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPages[3] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			firstPage[3] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
 			break;
 	}
 	const limiter = countThumbnails + 1 > 3 ? 4 : countThumbnails + 1;
 	for (let i = 0; i < limiter; i++) {
-		pagesPrepared.push({"ind": i, "page": firstPages[i]});
+		pagesPrepared.push({"position": i, "page": firstPage[i]});
 	}
-	populateTheRestPages();
-}
-
-// Fill pagesPrepared starting with 4th article ("second page")
-function populateTheRestPages() {
+	// Fill pagesPrepared starting with 4th article ("second page")
 	let i = 4;
 	while (pages.length > 0) {
 		const page = pages[Math.floor(Math.random() * pages.length)];
-		pagesPrepared.push({"ind": i, "page": page});
+		pagesPrepared.push({"position": i, "page": page});
 		pages.splice(pages.indexOf(page), 1);
 		i++;
 	}
 }
 
 // Generate and add to the page
-function placeArticle(page, searchWord, ind) {
-	if (ind < 4) {
-		$('.container').append(getArticleHtml(page.title, makeText(page, searchWord), ind, page.thumbnail));
-		$('.article-animate').eq(ind).animate({opacity: 1}, 800 + ind * 80);
+function placeArticle(article, searchWord, articleIndex) {
+	if (articleIndex < 4) {
+		$('.container').append(
+			getArticleHtml(article.title, highlightSearchWord(article.extract, searchWord), articleIndex, article.thumbnail)
+		);
+		$('.article-animate').eq(articleIndex).animate({opacity: 1}, 800 + articleIndex * 80);
 	} else {
-		if (ind == 4)
+		if (articleIndex == 4) {
 			createLines(searchWord);
-		getShortestLine().html(getShortestLine().html() 
-			+ getArticleHtml(page.title, makeText(page, searchWord), ind, page.thumbnail));
+		}
+		getShortestLine().html(
+			getShortestLine().html()
+			+ getArticleHtml(article.title, highlightSearchWord(article.extract, searchWord), articleIndex, article.thumbnail)
+		);
 	}
 }
 
@@ -314,36 +315,6 @@ function createLines(searchWord) {
 			`);
 }
 
-// Create template placeholders
-function createTemplatePlaceholders(count) {
-	for (let i = 0; i < count; i++) {
-		$('.container').append(`
-			<div class="article">
-				<h2 class="grayed-title">
-					<span>.</span>
-				</h2>
-				<div class="grayed-image">.</div>
-				<div class="grayed-text-container">
-					<p class="grayed-text">
-						<span>.</span>
-						<span>.</span>
-						<span>.</span>
-						<span>.</span>
-					</p>
-					<p class="grayed-text">
-						<span>.</span>
-						<span>.</span>
-						<span>.</span>
-						<span>.</span>
-						<span>.</span>
-						<span>.</span>
-					</p>
-				</div>
-			</div>
-			`);
-	}
-}
-
 // Random title style
 function randomTitleStyle() {
 	const italic = ['font-style: italic;', 'font-style: normal;'];
@@ -399,34 +370,32 @@ function calculateImages() {
 }
 
 // Highlight searched value in the results
-function makeText(page, searchWord) {
-	return page.extract.replace(RegExp(`(${searchWord})`, `ig`), `<span class="searchmatch">$1</span>`);
+function highlightSearchWord(text, searchWord) {
+	return text.replace(RegExp(`(${searchWord})`, `ig`), `<span class="searchmatch">$1</span>`);
 }
 
 function displayNoMatches() {
-	$('.no-matches').text('No results were found under your search, try something else.');
 	$('.no-matches').css('display', 'block');
 }
 
 function hideNoMatches() {
 	$('.no-matches').css('display', 'none');
-	$('.no-matches').text('');
 }
 
 
-$(document).ready(function() {
+$(document).ready(() => {
 
 	// Place header-side elements
 	placeHeaderSides();
 
 	// Resize event
-	$(window).on('resize', function() {
+	$(window).on('resize', () => {
 		placeHeaderSides();
 		calculateImages();
 	});
 
 	// Search onEnter event
-	$('.search-field').keyup(function(event) {
+	$('.search-field').keyup(event => {
 		hideNoMatches();
 		if ($('.search-field').val().length) {
 			// 13 for Enter key
@@ -443,7 +412,7 @@ $(document).ready(function() {
 	});
 
 	// HTML5 event handler
-	$('.search-field')[0].oninput = function(event) {
+	$('.search-field')[0].oninput = event => {
 		hideNoMatches();
 		if ($('.search-field').val().length && event.keyCode !== 13) {
 			requestAutocomplete($('.search-field').val());
@@ -451,7 +420,7 @@ $(document).ready(function() {
 	};
 
 	// Easter egg
-	$('.paper-title').on('click', function() {
+	$('.paper-title').on('click', () => {
 		if ($('.paper-title').text() != `I'm Codin' It`) {
 			$('.paper-title').text(`I'm Codin' It`);
 		} else {
