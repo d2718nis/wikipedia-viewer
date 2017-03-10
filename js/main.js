@@ -185,7 +185,7 @@ function populatePagesPrepared(countThumbnails) {
 function placeArticle(article, searchWord, articleIndex) {
 	if (articleIndex < 4) {
 		$('.container').append(
-			getArticleHtml(article.title, highlightSearchWord(article.extract, searchWord), articleIndex, article.thumbnail)
+			getArticleHtml(article.title, article.extract, searchWord, articleIndex, article.thumbnail)
 		);
 		$('.article-animate').eq(articleIndex).animate({opacity: 1}, 800 + articleIndex * 80);
 	} else {
@@ -194,13 +194,13 @@ function placeArticle(article, searchWord, articleIndex) {
 		}
 		getShortestLine().html(
 			getShortestLine().html()
-			+ getArticleHtml(article.title, highlightSearchWord(article.extract, searchWord), articleIndex, article.thumbnail)
+			+ getArticleHtml(article.title, article.extract, searchWord, articleIndex, article.thumbnail)
 		);
 	}
 }
 
 // Return article html string
-function getArticleHtml(articleTitle, articleText, articleIndex, articleThumbnail) {
+function getArticleHtml(articleTitle, articleText, searchWord, articleIndex, articleThumbnail) {
 	const img = getArticleImg(articleThumbnail, articleIndex);
 	switch (articleIndex) {
 		case 0:
@@ -217,11 +217,11 @@ function getArticleHtml(articleTitle, articleText, articleIndex, articleThumbnai
 					</a>
 				</div>
 				<div class="col-xs-12 text-container-${articleIndex+1}">
-					${articleText}
+					${highlightSearchWord(articleText, searchWord)}
 				</div>
 			</div>`;
 		case 1:
-			let delimiter = Math.round(articleText.length / 1.85);
+			let delimiter = Math.round(articleText.length / 2);
 			while (articleText.charAt(delimiter) !== ' ') {
 				delimiter++;
 			}
@@ -233,7 +233,7 @@ function getArticleHtml(articleTitle, articleText, articleIndex, articleThumbnai
 					</h2>
 				</a>
 				<div class="col-md-3 hidden-xs hidden-sm text-container-${articleIndex+1}-1">
-					${articleText.substr(0, delimiter)}
+					${highlightSearchWord(articleText.substr(0, delimiter), searchWord)}
 				</div>
 				<div class="col-xs-12 col-sm-8 col-md-6 image-container-${articleIndex+1}">
 					<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
@@ -241,10 +241,10 @@ function getArticleHtml(articleTitle, articleText, articleIndex, articleThumbnai
 					</a>
 				</div>
 				<div class="col-md-3 hidden-xs hidden-sm text-container-${articleIndex+1}-2">
-					${articleText.substr(delimiter + 1)}
+					${highlightSearchWord(articleText.substr(delimiter + 1), searchWord)}
 				</div>
 				<div class="col-xs-12 col-sm-4 visible-xs-block visible-sm-block text-container-${articleIndex+1}-3">
-					${articleText}
+					${highlightSearchWord(articleText, searchWord)}
 				</div>
 			</div>`;
 		case 2:
@@ -262,7 +262,7 @@ function getArticleHtml(articleTitle, articleText, articleIndex, articleThumbnai
 					</a>
 				</div>
 				<div class="col-xs-12 col-sm-8 text-container-${articleIndex+1}">
-					${articleText}
+					${highlightSearchWord(articleText, searchWord)}
 				</div>
 			</div>`;
 		default:
@@ -276,7 +276,7 @@ function getArticleHtml(articleTitle, articleText, articleIndex, articleThumbnai
 				<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}" target="_blank">
 					${img}
 				</a>
-				${articleText}
+				${highlightSearchWord(articleText, searchWord)}
 			</div>`;
 	}
 	
