@@ -3,6 +3,8 @@ var pages;
 var pageStats;
 var pagesPrepared;
 
+var articles;
+
 // Request JSON from Wikipedia API for autocomplete
 function requestAutocomplete(value) {
 	const getAutocomplete = $.getJSON(`https://en.wikipedia.org//w/api.php?
@@ -78,12 +80,14 @@ function requestWikiInfo(value) {
 }
 
 // Prepare pages
-function preparePages(articles) {
+function preparePages(jsonArticles) {
 	// TODO: delete this thing, TMP only
 	pages = [];
 	pageStats = { index: [], length: [], rate: [], k1: [], k234: [] };
 	pagesPrepared = [];
-	$.each(articles, (i, item) => {
+
+	articles = [];
+	$.each(jsonArticles, (i, item) => {
 		// Populate the array
 		if (!item.hasOwnProperty('pageprops') && item.hasOwnProperty('extract')) {
 			pages.push(item);
@@ -95,9 +99,24 @@ function preparePages(articles) {
 				* (item.thumbnail.width / item.thumbnail.height)) : 0);
 			pageStats.k234.push(item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.height 
 				/ (item.thumbnail.width / item.thumbnail.height)) : 0);
+
+			articles.push({
+				index: item.index,
+				position: undefined,
+				raw: item,
+				stats: {
+					length: item.extract.length,
+					rate: item.hasOwnProperty('thumbnail') ? item.thumbnail.width / item.thumbnail.height : 0,
+					k1: item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.width
+				* (item.thumbnail.width / item.thumbnail.height)) : 0,
+					k234: item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.height
+				/ (item.thumbnail.width / item.thumbnail.height)) : 0
+				}
+			});
 		}
 	});
-	populatePagesPrepared(pageStats.rate.reduce((acc, val) => acc += val ? 1 : 0));
+	//populatePagesPrepared(pageStats.rate.reduce((acc, val) => acc += val ? 1 : 0));
+	populatePagesPrepared(articles.reduce((acc, val) => acc += val.stats.rate ? 1 : 0, 0));
 }
 
 // Move item from pages array
@@ -120,46 +139,64 @@ function seekAndDestroy(sInd) {
 
 // Fill pagesPrepared depending on thumbnail quantity
 function populatePagesPrepared(countThumbnails) {
-	// Build page prototype
-	let firstPage = [];
 	switch(countThumbnails) {
 		case 0:
-			// Article with longest extract
-			firstPage[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
+			pagesPrepared.push({
+				position: 0,
+				page: seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)))
+			});
 			break;
 		case 1:
-			// Article with image
-			firstPage[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			// Article with longest extract
-			firstPage[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
+			pagesPrepared.push({
+				position: 1,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			}, {
+				position: 0,
+				page: seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)))
+			});
 			break;
 		case 2:
-			// Article with maximum k234 factor
-			firstPage[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPage[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			// Article with longest extract
-			firstPage[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
+			pagesPrepared.push({
+				position: 1,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			}, {
+				position: 2,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			}, {
+				position: 0,
+				page: seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)))
+			});
 			break;
 		case 3:
-			// Article with maximum k234 factor
-			firstPage[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPage[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPage[3] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			// Article with longest extract
-			firstPage[0] = seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)));
+			pagesPrepared.push({
+				position: 1,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			}, {
+				position: 2,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			}, {
+				position: 3,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			}, {
+				position: 0,
+				page: seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)))
+			});
 			break;
 		default:
-			// Article with maximum k234 factor
-			firstPage[0] = seekAndDestroy(pageStats.k1.indexOf(Math.max(...pageStats.k1)));
-			// Article with maximum k234 factor
-			firstPage[1] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPage[2] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
-			firstPage[3] = seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)));
+			pagesPrepared.push({
+				position: 0,
+				page: seekAndDestroy(pageStats.k1.indexOf(Math.max(...pageStats.k1)))
+			}, {
+				position: 1,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			}, {
+				position: 2,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			}, {
+				position: 3,
+				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
+			});
 			break;
-	}
-	const limiter = countThumbnails + 1 > 3 ? 4 : countThumbnails + 1;
-	for (let i = 0; i < limiter; i++) {
-		pagesPrepared.push({"position": i, "page": firstPage[i]});
 	}
 	// Fill pagesPrepared starting with 4th article ("second page")
 	let i = 4;
