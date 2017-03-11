@@ -1,8 +1,4 @@
 // Contains all requested pages info
-var pages;
-var pageStats;
-var pagesPrepared;
-
 var articles;
 
 // Request JSON from Wikipedia API for autocomplete
@@ -62,11 +58,13 @@ function requestWikiInfo(value) {
 		// Remove previous articles
 		$('.article').remove();
 		$('.three-lines').remove();
+		// Remove previous
+		articles = [];
 		if (json.hasOwnProperty('query')) {
 			// Prepare the array
-			preparePages(json.query.pages);
-			$.each(pagesPrepared, (i, item) => {
-				placeArticle(item.page, value, item.position);
+			prepareArticles(json.query.pages);
+			$.each(articles, (i, item) => {
+				placeArticle(item.raw, value, item.position);
 			});
 			calculateImages();
 		} else {
@@ -80,26 +78,10 @@ function requestWikiInfo(value) {
 }
 
 // Prepare pages
-function preparePages(jsonArticles) {
-	// TODO: delete this thing, TMP only
-	pages = [];
-	pageStats = { index: [], length: [], rate: [], k1: [], k234: [] };
-	pagesPrepared = [];
-
-	articles = [];
+function prepareArticles(jsonArticles) {
 	$.each(jsonArticles, (i, item) => {
 		// Populate the array
 		if (!item.hasOwnProperty('pageprops') && item.hasOwnProperty('extract')) {
-			pages.push(item);
-			// Page stats and counters
-			pageStats.index.push(item.index);
-			pageStats.length.push(item.extract.length);
-			pageStats.rate.push(item.hasOwnProperty('thumbnail') ? item.thumbnail.width / item.thumbnail.height : 0);
-			pageStats.k1.push(item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.width 
-				* (item.thumbnail.width / item.thumbnail.height)) : 0);
-			pageStats.k234.push(item.hasOwnProperty('thumbnail') ? Math.round(item.extract.length * item.thumbnail.height 
-				/ (item.thumbnail.width / item.thumbnail.height)) : 0);
-
 			articles.push({
 				index: item.index,
 				position: undefined,
@@ -115,97 +97,51 @@ function preparePages(jsonArticles) {
 			});
 		}
 	});
-	//populatePagesPrepared(pageStats.rate.reduce((acc, val) => acc += val ? 1 : 0));
-	populatePagesPrepared(articles.reduce((acc, val) => acc += val.stats.rate ? 1 : 0, 0));
+	// Pass number of thumbnails to the function
+	populateArticlePositions(articles.reduce((acc, val) => acc += val.stats.rate ? 1 : 0, 0));
+	// Sort by position field to place articles in right order
+	articles.sort((a, b) => a.position - b.position);
 }
 
-// Move item from pages array
-function seekAndDestroy(sInd) {
-	let articleToReturn;
-	$.each(pages, (i, article) => {
-		if (article.index == pageStats.index[sInd]) {
-			articleToReturn = article;
-			pages.splice(pages.indexOf(articleToReturn), 1);
-			$.each(pageStats, (i, pageStat) => {
-				// Remove index[sInd], length[sInd] ...
-				pageStat.splice(sInd, 1);
-			});
-			// break
-			return false;
-		}
-	});
-	return articleToReturn;
+// Set position for the article
+function setArticlePosition(pos, stat) {
+	articles[articles.indexOf(articles.find(el => {
+		return el.stats[stat] == articles.reduce((acc, val) => {
+			return acc = val.stats[stat] > acc && val.position === undefined  ? val.stats[stat] : acc;
+	}, 0)}))].position = pos;
 }
 
 // Fill pagesPrepared depending on thumbnail quantity
-function populatePagesPrepared(countThumbnails) {
+function populateArticlePositions(countThumbnails) {
 	switch(countThumbnails) {
 		case 0:
-			pagesPrepared.push({
-				position: 0,
-				page: seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)))
-			});
+			setArticlePosition(0, 'length');
 			break;
 		case 1:
-			pagesPrepared.push({
-				position: 1,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			}, {
-				position: 0,
-				page: seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)))
-			});
+			setArticlePosition(1, 'k234');
+			setArticlePosition(0, 'length');
 			break;
 		case 2:
-			pagesPrepared.push({
-				position: 1,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			}, {
-				position: 2,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			}, {
-				position: 0,
-				page: seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)))
-			});
+			setArticlePosition(1, 'k234');
+			setArticlePosition(2, 'k234');
+			setArticlePosition(0, 'length');
 			break;
 		case 3:
-			pagesPrepared.push({
-				position: 1,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			}, {
-				position: 2,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			}, {
-				position: 3,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			}, {
-				position: 0,
-				page: seekAndDestroy(pageStats.length.indexOf(Math.max(...pageStats.length)))
-			});
+			setArticlePosition(1, 'k234');
+			setArticlePosition(2, 'k234');
+			setArticlePosition(3, 'k234');
+			setArticlePosition(0, 'length');
 			break;
 		default:
-			pagesPrepared.push({
-				position: 0,
-				page: seekAndDestroy(pageStats.k1.indexOf(Math.max(...pageStats.k1)))
-			}, {
-				position: 1,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			}, {
-				position: 2,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			}, {
-				position: 3,
-				page: seekAndDestroy(pageStats.k234.indexOf(Math.max(...pageStats.k234)))
-			});
+			setArticlePosition(0, 'k1');
+			setArticlePosition(1, 'k234');
+			setArticlePosition(2, 'k234');
+			setArticlePosition(3, 'k234');
 			break;
 	}
-	// Fill pagesPrepared starting with 4th article ("second page")
+	// Fill position fields starting with 4th article ("second page")
 	let i = 4;
-	while (pages.length > 0) {
-		const page = pages[Math.floor(Math.random() * pages.length)];
-		pagesPrepared.push({"position": i, "page": page});
-		pages.splice(pages.indexOf(page), 1);
-		i++;
-	}
+	articles.map(val => val.position = val.position === undefined ? i++ : val.position);
 }
 
 // Generate and add to the page
