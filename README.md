@@ -34,7 +34,7 @@ Built with
 ----------
 * [Wikipedia API](https://www.mediawiki.org/wiki/API:Main_page) &#8212; a web service that provides convenient 
   access to wiki features, data, and meta-data over HTTP, via a URL usually at `api.php`
-* [JQuery](https://jquery.com) &#8212; a fast, small, and feature-rich JavaScript library
+* [jQuery](https://jquery.com) &#8212; a fast, small, and feature-rich JavaScript library
 * [Bootstrap](http://getbootstrap.com) &#8212; the most popular HTML, CSS, and JS framework for developing
   responsive, mobile first projects on the web
 * CSS3
