@@ -50,7 +50,7 @@ who participated in this project.
 Acknowledgments
 ----------
 * [Google fonts](https://fonts.google.com) &#8212; a great collection of free and easy to use fonts
-* [Wikipedia](https://en.wikipedia.org/wiki/Main_Page) &#8212; a multilingual, web-based, free-content 
-  encyclopedia project supported by the Wikimedia Foundation and based on a model of openly editable content
+* [Wikipedia](https://www.wikipedia.org) &#8212; a multilingual, web-based, free-content encyclopedia 
+  project supported by the Wikimedia Foundation and based on a model of openly editable content
 * [Wikipedia: Newspaper](https://en.wikipedia.org/wiki/Newspaper) &#8212; a serial publication containing 
   news about current events, other informative articles about politics, sports, arts, and so on, and advertising
