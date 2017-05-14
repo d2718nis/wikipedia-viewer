@@ -37,8 +37,6 @@ Built with
 * [jQuery](https://jquery.com) &#8212; a fast, small, and feature-rich JavaScript library
 * [Bootstrap](http://getbootstrap.com) &#8212; the most popular HTML, CSS, and JS framework for developing
   responsive, mobile first projects on the web
-* CSS3
-* HTML5
 
 
 Authors
